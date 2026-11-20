@@ -1,0 +1,6 @@
+{
+  "read_file":   {"decision": "allow", "reason": "reading inside PigeonReadable is safe"},
+  "write_file":  {"decision": "allow",   "reason": "writing inside PigeonReadable is allowed"},
+  "send_email":  {"decision": "ask", "reason": "it sends a real email", "allowed_recipients": ["harsh.raodeo@gmail.com","harshraodeo275@gmail.com", "preeti.raodeo@gmail.com"]},
+  "delete_file": {"decision": "deny",  "reason": "Deleting is never allowed"}
+}
