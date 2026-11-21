@@ -18,6 +18,10 @@ client = genai.Client(
     http_options=types.HttpOptions(timeout=30000),
 )
 
+types.FunctionDeclaration(
+        name="list_files",
+        description="List the names of the files in the allowed folder. Use this when unsure of an exact file name.",
+    ),
 
 def make_declaration(name, description, params, optional=()):
     """Describe a tool to Gemini. params = {argument_name: description}."""
@@ -36,7 +40,11 @@ def make_declaration(name, description, params, optional=()):
 
 
 declarations = [
-    make_declaration("read_file", "Read a text file from the workspace.",
+    types.FunctionDeclaration(
+        name="list_files",
+        description="List the names of the files in the allowed folder. Use this when unsure of an exact file name.",
+    ),
+    make_declaration("read_file", "Read a text, PDF or Word file from the folder.",
                      {"filename": "File name, e.g. sample.txt"}),
     make_declaration("write_file", "Write text to a file in the workspace.",
                      {"filename": "File name", "content": "Text to write"}),
@@ -54,6 +62,7 @@ config = types.GenerateContentConfig(
         "You are Pigeon, an assistant with file and email tools. "
         "Only say a file is attached if you passed it in the attachment argument. "
         "If a tool returns an error or a block, report that honestly."
+        "If you are unsure of an exact file name, call list_files first. "
     ),
     tools=[types.Tool(function_declarations=declarations)],
     automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
@@ -89,6 +98,8 @@ def describe(name, args):
         return f'read {args.get("filename")}'
     if name == "delete_file":
         return f'delete {args.get("filename")}'
+    if name == "list_files":
+        return "list the files in PigeonReadable"
     return name
 
 def run_agent(task):
@@ -105,7 +116,7 @@ def run_agent(task):
 
         result_parts = []
         for call in calls:
-            args = dict(call.args)
+            args = dict(call.args or {})
             action = describe(call.name, args)
 
             # THE GUARD: every action passes through here

@@ -102,8 +102,25 @@ def send_email(to, subject, body, attachment=None):
     except Exception as e:
         return f"ERROR: {e}"
 
+MAX_LISTED = 50
+
+
+def list_files():
+    try:
+        names = []
+        for item in sorted(FOLDER.iterdir()):
+            names.append(item.name + ("/" if item.is_dir() else ""))
+        if not names:
+            return "The folder is empty."
+        shown = names[:MAX_LISTED]
+        extra = len(names) - len(shown)
+        text = "\n".join(shown)
+        return text + (f"\n[...and {extra} more]" if extra > 0 else "")
+    except Exception as e:
+        return f"ERROR: {e}"
 
 TOOL_FUNCTIONS = {
+    "list_files": list_files,
     "read_file": read_file,
     "write_file": write_file,
     "delete_file": delete_file,
